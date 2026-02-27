@@ -1,0 +1,37 @@
+# Dependencias - SIEMPRE ignorar
+node_modules/
+
+# Archivos de entorno - NUNCA subir (contienen secrets)
+.env
+.env.local
+.env.production
+.env.development
+
+# Logs - Ignorar archivos de log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Archivos de sistema operativo
+.DS_Store      # macOS
+Thumbs.db      # Windows
+
+# IDE/Editor - Archivos de configuración local
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de compilación/distribución
+dist/
+build/
+*.tsbuildinfo
+
+# Archivos de cobertura de tests
+coverage/
+.nyc_output/
+
+# Railway específico (si usas Railway.app)
+railway.json   # Si contiene configuraciones locales, mejor ignorarlo
