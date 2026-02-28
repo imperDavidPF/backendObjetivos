@@ -36,7 +36,10 @@ async function fetchDataFromSFTP() {
             host: SFTP_CONFIG.host,
             username: SFTP_CONFIG.username,
             password: SFTP_CONFIG.password,
-            readyTimeout: 60000,
+            readyTimeout: 120000,
+            retries: 3,
+            retry_factor: 2,
+            retry_minTimeout: 5000,
             algorithms: {
                 kex: [
                     'diffie-hellman-group1-sha1',
@@ -61,7 +64,8 @@ async function fetchDataFromSFTP() {
                     'ecdsa-sha2-nistp521'
                 ],
                 hmac: ['hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1']
-            }
+            },
+            debug: console.log
         });
 
         console.log(`[${new Date().toISOString()}] ✅ Conectado, leyendo archivo...`);
