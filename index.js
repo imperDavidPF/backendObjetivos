@@ -105,7 +105,7 @@ async function fetchDataFromSFTP() {
 // Función para actualizar caché
 async function updateCache() {
     if (isUpdating) {
-        console.log(`[${new Date().toISOString()}] ⏳ Actualización en curso...`);
+        console.log(`[${new Date().toISOString()}] Actualización en curso...`);
         return;
     }
 
@@ -113,13 +113,19 @@ async function updateCache() {
     updateError = null;
     
     try {
-        console.log(`[${new Date().toISOString()}] 🔄 Actualizando caché...`);
+        console.log(`[${new Date().toISOString()}]  Actualizando caché...`);
         const newData = await fetchDataFromSFTP();
-        cachedData = newData;
-        lastUpdate = new Date();
-        console.log(`[${new Date().toISOString()}] ✅ Caché actualizado: ${newData.metadata.totalRegistros} registros`);
+
+        if(newData && newData.success && newData.data && newData.metadata){
+            cachedData = newData;
+            lastUpdate = new Date();
+            console.log(`[${new Date().toISOString()}]     Cache actualizado: ${newData.metadata.totalRegistros} registros`)
+        }else {
+            throw new Error('Datos recibidos con formato invalido')
+        }
+
     } catch (error) {
-        console.error(`[${new Date().toISOString()}] ❌ Error actualizando caché:`, error);
+        console.error(`[${new Date().toISOString()}] Error actualizando caché:`, error);
         updateError = error.message;
     } finally {
         isUpdating = false;
@@ -156,18 +162,19 @@ app.get('/api/reporte-objetivos', async (req, res) => {
             return res.status(503).json({
                 success: false,
                 error: 'No hay datos disponibles en este momento',
-                details: updateError || 'Error en la conexión SFTP',
+                details: updateError || 'Error en la conexión SFTP - No se puedo establacr conexion',
                 timestamp: new Date().toISOString()
             });
         }
+
 
         // ✅ Devolver datos correctamente
         res.json({
             success: true,
             data: cachedData.data,
             metadata: {
-                totalRegistros: cachedData.metadata.totalRegistros,
-                lastUpdate: cachedData.metadata.lastUpdate,
+                totalRegistros: cachedData.metadata.totalRegistros || 0,
+                lastUpdate: cachedData.metadata.lastUpdate || new Date().toISOString(),
                 fromCache: true
             }
         });
