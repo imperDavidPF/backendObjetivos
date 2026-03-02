@@ -105,7 +105,7 @@ async function fetchDataFromSFTP() {
     }
 }
 
-app.get('/api/diagnostico-red', async (req, res) => {
+app.get('/diagnostico-red', async (req, res) => {
     const results = {
         dns: null,
         puerto22: null,
