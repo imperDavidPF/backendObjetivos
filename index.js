@@ -15,7 +15,7 @@ const SFTP_CONFIG = {
 
 // CORS
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://backendobjetivos-production.up.railway.app'],
+    origin: ['https://backendobjetivos-production.up.railway.app'],
     methods: ['GET', 'OPTIONS'],
     allowedHeaders: ['Content-Type']
 }));
@@ -36,8 +36,8 @@ async function fetchDataFromSFTP() {
             host: SFTP_CONFIG.host,
             username: SFTP_CONFIG.username,
             password: SFTP_CONFIG.password,
-            readyTimeout: 120000,
-            retries: 3,
+            readyTimeout: 300000,
+            retries: 5,
             retry_factor: 2,
             retry_minTimeout: 5000,
             algorithms: {
