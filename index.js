@@ -3,6 +3,9 @@ const SFTPClient = require('ssh2-sftp-client');
 const XLSX = require('xlsx');
 const app = express();
 const cors = require('cors');
+const dns = require('dns');
+const net = require('net');
+const { clearTimeout } = require('timers');
 
 // Configuración
 const PORT = process.env.PORT || 3001;
@@ -101,6 +104,50 @@ async function fetchDataFromSFTP() {
         await sftp.end();
     }
 }
+
+app.get('/api/diagnostico-red', async (req, res) => {
+    const results = {
+        dns: null,
+        puerto22: null,
+        timestamp: new Date().toISOString()
+    };
+    
+    // 1. Ver resolución DNS
+    try {
+        const address = await new Promise((resolve, reject) => {
+            dns.lookup(SFTP_CONFIG.host, (err, address) => {
+                if (err) reject(err);
+                else resolve(address);
+            });
+        });
+        results.dns = { exito: true, ip: address };
+        
+        // 2. Ver si el puerto 22 está abierto (conexión TCP simple)
+        const socket = new net.Socket();
+        results.puerto22 = await new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                resolve({ exito: false, error: 'Timeout al conectar al puerto 22' });
+                socket.destroy();
+            }, 5000);
+            
+            socket.connect(22, address, () => {
+                clearTimeout(timeout);
+                resolve({ exito: true, mensaje: 'Puerto 22 abierto' });
+                socket.destroy();
+            });
+            
+            socket.on('error', (err) => {
+                clearTimeout(timeout);
+                resolve({ exito: false, error: err.message });
+                socket.destroy();
+            });
+        });
+    } catch (error) {
+        results.dns = { exito: false, error: error.message };
+    }
+    
+    res.json(results);
+});
 
 // Función para actualizar caché
 async function updateCache() {
